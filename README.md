@@ -1,4 +1,5 @@
-##Build
+[Demo](https://doccaico.github.io/conway/)
+## Build
 ### Desktop
 ```sh
 $ mkdir build
