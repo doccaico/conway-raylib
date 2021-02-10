@@ -6,6 +6,7 @@
 // #define _POSIX_C_SOURCE 199309L
 #include <time.h>
 
+
 uint8_t JCW_board[JCW_HEIGHT+2][JCW_WIDTH+2] = {0};
 
 static void JCW_swap(uint8_t* a, uint8_t* b) {

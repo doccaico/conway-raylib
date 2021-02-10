@@ -1,75 +1,68 @@
-// #include <stdlib.h>
-//
-#define JCW_WIDTH       60
-#define JCW_HEIGHT      40
-// #define JCW_LIVE_CELLS  30
-#define JCW_LIVE_CELLS  20
-// #define WAIT = 150
-#include "conway.h"
-
-#define CELL_WIDTH 8
-#define CELL_HEIGHT 8
-
-/*******************************************************************************************
- *
- *   raylib [textures] example - Image processing
- *
- *   NOTE: Images are loaded in CPU memory (RAM); textures are loaded in GPU memory (VRAM)
- *
- *   This example has been created using raylib 3.5 (www.raylib.com)
- *   raylib is licensed under an unmodified zlib/libpng license (View raylib.h for details)
- *
- *   Copyright (c) 2016 Ramon Santamaria (@raysan5)
- *
- ********************************************************************************************/
-
 #include "raylib.h"
 
-#include <stdlib.h>             // Required for: free()
+#define SCREEN_WIDTH    740
+#define SCREEN_HEIGHT   450
+#define NUM_PATTERNS    9
 
-#define NUM_PATTERNS  3
+#define JCW_WIDTH       60
+#define JCW_HEIGHT      40
+#define JCW_LIVE_CELLS  25
+#define CELL_WIDTH      8
+#define CELL_HEIGHT     8
+
+#include "conway.h"
+#include "presets.h"
 
 typedef enum {
   RANDOM,
-  MANUAL,
-  EMT,
+  GOSPER,
+  SIMKIN,
+  P46,
+  GLIDER,
+  SIX,
+  BI,
+  NEW,
+  BLOCKER,
 } Patterns;
 
 static const char *patternsText[] = {
-  "RANDOM",
-  "MANUAL",
-  "EMT",
+  "Random",
+  "Gosper glider gun",
+  "Simkin glider gun",
+  "P46 gun",
+  "Glider pusher",
+  "6 bits",
+  "Bi-gun",
+  "New gun 1",
+  "Blocker",
 };
 
-void drawRandom() {
+void draw() {
   for (int y = 1; y < JCW_HEIGHT + 1; y++) {
     for (int x = 1; x < JCW_WIDTH + 1; x++) {
-      // putchar(JCW_board[y][x] == 1 ? '*' : ' ');
       if (JCW_board[y][x] == 1) {
-        DrawRectangle(220+1+(x-1)*CELL_WIDTH, 50+1+(y-1)*CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT, BLACK);
+        DrawRectangle(220 + 1 + (x - 1) * CELL_WIDTH, 50 + 1 + (y - 1) * CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT, BLACK);
       }
     }
   }
 }
 
 int main(void) {
-  const int screenWidth  = 740;
-  const int screenHeight = 450;
+  InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Conway's Game of Life");
+  SetTargetFPS(60);
 
-  InitWindow(screenWidth, screenHeight, "Conway's Game of Life");
-
-
-  int  currentProcess = RANDOM;
-  bool boardReload    = true;
-  int         wait = 0;
+  int       currentProcess           = RANDOM;
+  int       run                      = false;
+  bool      boardReload              = true;
+  int       wait                     = 0;
   Rectangle toggleRecs[NUM_PATTERNS] = {0};
 
   for (int i = 0; i < NUM_PATTERNS; i++) {
-    toggleRecs[i] = (Rectangle){40.0f, (float)(50 + 32 * i), 150.0f, 30.0f};
+    toggleRecs[i] = (Rectangle){40.0f, (float)(50 + 36.5 * i), 150.0f, 30.0f};
   }
 
-  // SetTargetFPS(60);
-  SetTargetFPS(30);
+
+  JCW_randomize();
 
   while (!WindowShouldClose()) {
     // Mouse toggle group logic
@@ -78,6 +71,7 @@ int main(void) {
         if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
           currentProcess = i;
           boardReload    = true;
+          run            = false;
         }
         break;
       }
@@ -90,51 +84,73 @@ int main(void) {
         currentProcess = 0;
       }
       boardReload = true;
+      run         = false;
     } else if (IsKeyPressed(KEY_UP)) {
       currentProcess--;
       if (currentProcess < 0) {
         currentProcess = NUM_PATTERNS - 1;
       }
       boardReload = true;
+      run         = false;
+    } else if (IsKeyPressed(KEY_ENTER)) {
+      run = !run;
     }
 
-    // Reload board when required
     if (boardReload) {
+      JCW_clearBoard();
       switch (currentProcess) {
       case RANDOM:
-        JCW_clearBoard();
-        JCW_randomize();
         JCW_initBoard();
         break;
-      case MANUAL:
-        // DrawRectangle(0,0,20,20,DARKGRAY);
+      case GOSPER:
+        JCW_gosperGliderGun();
         break;
-      default: break;
+      case SIMKIN:
+        JCW_simkinGliderGun();
+        break;
+      case P46:
+        JCW_p46Gun();
+        break;
+      case GLIDER:
+        JCW_gliderPusher();
+        break;
+      case SIX:
+        JCW_6bits();
+        break;
+      case BI:
+        JCW_biGun();
+        break;
+      case NEW:
+        JCW_newGun1();
+        break;
+      case BLOCKER:
+        JCW_blocker();
+        break;
+      default:
+        break;
       }
       boardReload = false;
     }
 
     BeginDrawing();
-
     ClearBackground(RAYWHITE);
 
-    // DrawRectangle(280, 50, 20, 20, BLACK);
-    DrawRectangleLines(220, 50, JCW_WIDTH*CELL_WIDTH+2, JCW_HEIGHT*CELL_HEIGHT+2, GRAY);
-    drawRandom();
+    // draw board
+    DrawRectangleLines(220, 50, JCW_WIDTH * CELL_WIDTH + 2, JCW_HEIGHT * CELL_HEIGHT + 2, GRAY);
+    draw();
 
-    // if (IsKeyPressed(KEY_ENTER)) {
-    // }
     if (wait == 0) {
-      JCW_nextGeneration();
-      wait   = 10;
+      if (run) {
+        JCW_nextGeneration();
+      }
+      wait = 5;
     }
     if (wait > 0) {
       wait -= 1;
     }
 
 
-    DrawText("IMAGE PROCESSING:", 40, 30, 10, DARKGRAY);
-
+    DrawText("R.I.P John Horton Conway", 50, 30, 10, DARKGRAY);
     // Draw rectangles
     for (int i = 0; i < NUM_PATTERNS; i++) {
       DrawRectangleRec(toggleRecs[i], (i == currentProcess) ? SKYBLUE : LIGHTGRAY);
