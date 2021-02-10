@@ -1,4 +1,8 @@
 [Demo](https://doccaico.github.io/conway/)
+```
+Move a cursor: Arrow key or Left click
+Run: Enter
+```
 ## Build
 ### Desktop
 ```sh
