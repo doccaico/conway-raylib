@@ -1,9 +1,6 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-// #define __USE_POSIX199309
-// #define _POSIX_C_SOURCE 199309L
 #include <time.h>
 
 
