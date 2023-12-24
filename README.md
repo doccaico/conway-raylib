@@ -1,4 +1,4 @@
-[Demo](https://doccaico.github.io/conway/)
+[Demo](https://doccaico.github.io/conway-raylib/)
 ```
 Move a cursor: Arrow key or Left click
 Run: Enter
